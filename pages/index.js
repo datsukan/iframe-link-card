@@ -48,14 +48,10 @@ function extractOGP(html) {
   const description = $("meta[property='og:description']").attr("content")
   const imageUrl = $("meta[property='og:image']").attr("content")
 
-  if (!title || !description || !imageUrl) {
-    return null
-  }
-
   const ogp = {
-    title: title,
-    description: description,
-    imageUrl: imageUrl,
+    title: title ?? null,
+    description: description ?? null,
+    imageUrl: imageUrl ?? null,
   }
 
   return ogp

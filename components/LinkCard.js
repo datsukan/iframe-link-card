@@ -4,7 +4,9 @@ export const LinkCard = ({ title, description, siteUrl, domain, imageUrl }) => {
       <div className="h-32 w-full rounded-lg border border-gray-300 flex overflow-hidden hover:bg-sky-50/40">
         <div className="flex-1 p-3 flex flex-col justify-between">
           <div>
-            <p className="text-lg font-bold line-clamp-2">{title}</p>
+            <p className="text-lg font-bold line-clamp-2 break-all">
+              {title ?? siteUrl}
+            </p>
             <p className="mt-1 text-xs text-gray-500 line-clamp-1">
               {description}
             </p>
@@ -18,13 +20,15 @@ export const LinkCard = ({ title, description, siteUrl, domain, imageUrl }) => {
             <span className="text-xs">{domain}</span>
           </div>
         </div>
-        <div className="h-full aspect-square sm:aspect-auto">
-          <img
-            src={imageUrl}
-            className="w-full h-full object-cover"
-            alt="site image"
-          />
-        </div>
+        {imageUrl && (
+          <div className="h-full aspect-square sm:aspect-auto">
+            <img
+              src={imageUrl}
+              className="w-full h-full object-cover"
+              alt="site image"
+            />
+          </div>
+        )}
       </div>
     </a>
   )
