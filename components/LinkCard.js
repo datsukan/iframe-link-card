@@ -1,7 +1,7 @@
 export const LinkCard = ({ title, description, siteUrl, domain, imageUrl }) => {
   return (
     <a href={siteUrl} target="_blank" rel="noopener noreferrer">
-      <div className="h-32 w-full max-w-4xl rounded-lg border border-gray-300 flex overflow-hidden hover:bg-sky-50/40">
+      <div className="h-32 w-full max-w-4xl rounded-lg border border-gray-300 flex overflow-hidden group hover:bg-gray-100">
         <div className="flex-1 p-3 flex flex-col justify-between">
           <div>
             <p className="text-lg font-bold line-clamp-2 break-all">
@@ -21,7 +21,7 @@ export const LinkCard = ({ title, description, siteUrl, domain, imageUrl }) => {
           </div>
         </div>
         {imageUrl && (
-          <div className="h-full aspect-square sm:aspect-auto">
+          <div className="h-full aspect-square sm:aspect-auto group-hover:mix-blend-multiply">
             <img
               src={imageUrl}
               className="w-full h-full object-cover"
