@@ -1,6 +1,6 @@
 export const LinkCard = ({ title, description, siteUrl, domain, imageUrl }) => {
   return (
-    <div className="h-32 w-full rounded-lg ring-1 ring-gray-300 flex overflow-hidden hover:bg-sky-50/40">
+    <div className="h-32 w-full rounded-lg border border-gray-300 flex overflow-hidden hover:bg-sky-50/40">
       <div className="flex-1 p-3 flex flex-col justify-between">
         <div>
           <p className="text-lg font-bold line-clamp-2">{title}</p>
