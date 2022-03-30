@@ -5,8 +5,8 @@ const sampleProps = {
   title:
     "タイトルタイトルタイトルタイトルタイトルタイトルタイトルタイトルタイトルタイトルタイトル",
   description: "説明文です説明文です説明文です説明文です",
-  siteUrl: "https://blog.datsukan.me/",
-  domain: "blog.datsukan.me",
+  siteUrl: "https://example.com/",
+  domain: "example.com",
   imageUrl:
     "https://storage.googleapis.com/zenn-user-upload/gxnwu3br83nsbqs873uibiy6fd43",
 }
