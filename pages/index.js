@@ -52,41 +52,61 @@ async function getOGP(url) {
     return null
   }
 
-  const response = await axios.get(url, { maxRedirects: 10 })
-  const props = extractOGP(response.data)
+  const response = await axios.get(url, { maxRedirects: 5 })
+  const [title, description, imageUrl] = extractOGP(response.data)
 
-  if (!props) return null
+  const siteUrl = response.request.res.responseUrl
+  const domain = siteUrl.match(/^https?:\/{2,}(.*?)(?:\/|\?|#|$)/)[1]
 
-  props.siteUrl = response.request.res.responseUrl
-  props.domain = props.siteUrl.match(/^https?:\/{2,}(.*?)(?:\/|\?|#|$)/)[1]
-
-  return props
+  return {
+    title: title ?? null,
+    description: description ?? null,
+    imageUrl: imageUrl ?? null,
+    siteUrl: siteUrl,
+    domain: domain,
+  }
 }
 
 function extractOGP(html) {
   const $ = cheerio.load(html)
   let title, description, imageUrl
-  title = $("meta[property='og:title']").attr("content")
-  description = $("meta[property='og:description']").attr("content")
-  imageUrl = $("meta[property='og:image']").attr("content")
-
-  if (!title && !description && !imageUrl) {
-    // Amazonの商品ページ
-    title = $("#productTitle").text()
-    description = $("#feature-bullets").text()
-    imageUrl = $("#landingImage").attr("src")
-
-    if (!imageUrl) {
-      // 電子書籍
-      imageUrl = $("#imgBlkFront").attr("src")
-    }
+  ;[title, description, imageUrl] = extractNormalOGP($)
+  if (title && description && imageUrl) {
+    return [title, description, imageUrl]
   }
 
-  const ogp = {
-    title: title ?? null,
-    description: description ?? null,
-    imageUrl: imageUrl ?? null,
+  ;[title, description, imageUrl] = extractAmazonOGP($)
+  return [title, description, imageUrl]
+}
+
+// 一般的なOGP情報を抽出する
+function extractNormalOGP($) {
+  const title = $("meta[property='og:title']").attr("content")
+  const description = $("meta[property='og:description']").attr("content")
+  const imageUrl = $("meta[property='og:image']").attr("content")
+
+  return [title, description, imageUrl]
+}
+
+// Amazon商品ページのOGP情報を抽出する
+function extractAmazonOGP($) {
+  let title, description, imageUrl
+
+  title = $("#productTitle").text()
+  description = $("#feature-bullets").text()
+  imageUrl = $("#landingImage").attr("src")
+  if (imageUrl) {
+    return [title, description, imageUrl]
   }
 
-  return ogp
+  // 書籍
+  // 紙
+  imageUrl = $("#imgBlkFront").attr("src")
+  if (imageUrl) {
+    return [title, description, imageUrl]
+  }
+
+  // 電子
+  imageUrl = $("#ebooksImgBlkFront").attr("src")
+  return [title, description, imageUrl]
 }
