@@ -71,10 +71,15 @@ function extractOGP(html) {
   imageUrl = $("meta[property='og:image']").attr("content")
 
   if (!title && !description && !imageUrl) {
-    // Amazon
+    // Amazonの商品ページ
     title = $("#productTitle").text()
     description = $("#feature-bullets").text()
     imageUrl = $("#landingImage").attr("src")
+
+    if (!imageUrl) {
+      // 電子書籍
+      imageUrl = $("#imgBlkFront").attr("src")
+    }
   }
 
   const ogp = {
