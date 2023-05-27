@@ -1,3 +1,4 @@
+import axios from "axios"
 import * as cheerio from "cheerio"
 import { LinkCard } from "@components/LinkCard"
 
@@ -15,11 +16,31 @@ export default function Home(props) {
   return <LinkCard {...props} />
 }
 
+const MAX_CACHE_SIZE = 1000
+const cache = {}
+
 export const getServerSideProps = async context => {
   const { url = null } = context.query
-  const props = url ? await getOGP(url) : sampleProps
 
-  return { props: { ...props } }
+  if (!url) {
+    return { props: { ...sampleProps } }
+  }
+
+  if (cache[url]) {
+    return { props: { ...cache[url] } }
+  }
+
+  const ogp = await getOGP(url)
+
+  // キャッシュサイズが上限に達している場合、最も古いエントリを削除
+  if (Object.keys(cache).length >= MAX_CACHE_SIZE) {
+    const oldestKey = Object.keys(cache)[0]
+    delete cache[oldestKey]
+  }
+
+  cache[url] = ogp
+
+  return { props: { ...ogp } }
 }
 
 async function getOGP(url) {
@@ -31,22 +52,30 @@ async function getOGP(url) {
     return null
   }
 
-  const data = await fetch(url)
-  const props = extractOGP(await data.text())
+  const response = await axios.get(url, { maxRedirects: 10 })
+  const props = extractOGP(response.data)
 
   if (!props) return null
 
-  props.siteUrl = url
-  props.domain = url.match(/^https?:\/{2,}(.*?)(?:\/|\?|#|$)/)[1]
+  props.siteUrl = response.request.res.responseUrl
+  props.domain = props.siteUrl.match(/^https?:\/{2,}(.*?)(?:\/|\?|#|$)/)[1]
 
   return props
 }
 
 function extractOGP(html) {
   const $ = cheerio.load(html)
-  const title = $("meta[property='og:title']").attr("content")
-  const description = $("meta[property='og:description']").attr("content")
-  const imageUrl = $("meta[property='og:image']").attr("content")
+  let title, description, imageUrl
+  title = $("meta[property='og:title']").attr("content")
+  description = $("meta[property='og:description']").attr("content")
+  imageUrl = $("meta[property='og:image']").attr("content")
+
+  if (!title && !description && !imageUrl) {
+    // Amazon
+    title = $("#productTitle").text()
+    description = $("#feature-bullets").text()
+    imageUrl = $("#landingImage").attr("src")
+  }
 
   const ogp = {
     title: title ?? null,
