@@ -17,6 +17,7 @@ export default function Home(props) {
 }
 
 const MAX_CACHE_SIZE = 1000
+const REQUEST_TIMEOUT = 5000
 const cache = {}
 
 export const getServerSideProps = async context => {
@@ -45,18 +46,54 @@ export const getServerSideProps = async context => {
 
 async function getOGP(url) {
   // バリデーション
-  if (!url || url.length === 0 || typeof url !== "string") {
-    return null
-  }
-  if (url.indexOf("https://") !== 0 && url.indexOf("https://") !== 0) {
-    return null
+  if (!url || typeof url !== "string" || url.length === 0) {
+    return {}
   }
 
-  const response = await axios.get(url, { maxRedirects: 5 })
+  let parsedUrl
+  try {
+    parsedUrl = new URL(url)
+  } catch {
+    return {
+      title: null,
+      description: null,
+      imageUrl: null,
+      siteUrl: url,
+      domain: url,
+    }
+  }
+
+  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+    return {
+      title: null,
+      description: null,
+      imageUrl: null,
+      siteUrl: url,
+      domain: parsedUrl.hostname,
+    }
+  }
+
+  let response
+  try {
+    response = await axios.get(url, {
+      maxRedirects: 5,
+      timeout: REQUEST_TIMEOUT,
+      maxContentLength: 2 * 1024 * 1024,
+    })
+  } catch {
+    return {
+      title: null,
+      description: null,
+      imageUrl: null,
+      siteUrl: url,
+      domain: parsedUrl.hostname,
+    }
+  }
+
   const [title, description, imageUrl] = extractOGP(response.data)
 
-  const siteUrl = response.request.res.responseUrl
-  const domain = siteUrl.match(/^https?:\/{2,}(.*?)(?:\/|\?|#|$)/)[1]
+  const siteUrl = response.request?.res?.responseUrl ?? url
+  const domain = new URL(siteUrl).hostname
 
   return {
     title: title ?? null,
