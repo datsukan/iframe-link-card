@@ -112,14 +112,21 @@ async function getOGP(url) {
 
 function extractOGP(html) {
   const $ = cheerio.load(html)
-  let title, description, imageUrl
-  ;[title, description, imageUrl] = extractNormalOGP($)
-  if (title && description && imageUrl) {
-    return [title, description, imageUrl]
+  const normal = extractNormalOGP($)
+  if (normal.every(Boolean)) {
+    return normal
   }
 
-  ;[title, description, imageUrl] = extractAmazonOGP($)
-  return [title, description, imageUrl]
+  // 一部が取得できなかった場合は、取得済みの値を優先して不足分のみ補完する
+  const amazon = extractAmazonOGP($)
+  const fallback = [
+    $("title").text(),
+    $("meta[name='description']").attr("content"),
+    undefined,
+  ]
+  return normal.map((value, i) =>
+    [value, amazon[i], fallback[i]].map(v => v?.trim()).find(Boolean)
+  )
 }
 
 // 一般的なOGP情報を抽出する
