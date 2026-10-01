@@ -79,6 +79,12 @@ async function getOGP(url) {
       maxRedirects: 5,
       timeout: REQUEST_TIMEOUT,
       maxContentLength: 2 * 1024 * 1024,
+      // axiosのデフォルトUAだと応答を返さないサイトがあるため明示する
+      // ブラウザのUAを装うとAmazonでボット判定されるため、compatible形式にする
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; iframe-link-card/1.0)",
+        Accept: "text/html,application/xhtml+xml,*/*;q=0.8",
+      },
     })
   } catch {
     return {
