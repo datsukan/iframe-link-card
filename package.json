@@ -11,7 +11,7 @@
   "dependencies": {
     "axios": "^1.4.0",
     "cheerio": "^1.0.0-rc.10",
-    "next": "12.1.2",
+    "next": "12.3.4",
     "react": "18.0.0",
     "react-dom": "18.0.0",
     "swr": "^1.2.2"
@@ -20,7 +20,7 @@
     "@tailwindcss/line-clamp": "^0.3.1",
     "autoprefixer": "^10.4.4",
     "eslint": "8.12.0",
-    "eslint-config-next": "12.1.2",
+    "eslint-config-next": "12.3.4",
     "postcss": "^8.4.12",
     "tailwindcss": "^3.0.23"
   }
